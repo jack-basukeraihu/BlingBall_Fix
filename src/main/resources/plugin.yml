@@ -1,0 +1,20 @@
+name: ${project.build.finalName}
+version: ${project.version}
+main: ${pluginMain}
+author: jack_basukeraihu
+commands:
+  ball:
+    description: Creates a ball.
+    usage: /ball
+    permission: BlingBall.ball
+    permission-message: You don't have permission to create balls.
+  clearballs:
+    description: Destroys all currently loaded balls.
+    usage: /clearballs
+    permission: BlingBall.ball
+    permission-message: You don't have permission to destroy balls.
+
+permissions:
+  BlingBall.ball:
+    description: Allows you to create or destroy balls.
+    default: op
