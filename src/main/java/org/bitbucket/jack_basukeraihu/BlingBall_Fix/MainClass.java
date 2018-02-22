@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -21,6 +22,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
+import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -31,6 +33,7 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -47,12 +50,23 @@ public class MainClass extends JavaPlugin implements Listener {
 		this.velocities = new HashMap<UUID, Vector>();
 	}
 
+	public HashSet<Slime> getBalls() {
+		return balls;
+	}
+
 	//プラグインロード
 	public void onEnable() {
 		this.getLogger().info("BlingBall has been loaded.");
 		this.getServer().getPluginManager().registerEvents((Listener) this, (Plugin) this);
 		this.ballIds = new HashSet<UUID>();
 		this.balls = new HashSet<Slime>();
+
+		//Crackshotロードチェック
+		if (Bukkit.getPluginManager().isPluginEnabled("CrackShot")) {
+			PluginManager pm = getServer().getPluginManager();
+			pm.registerEvents(new CrackShotListener(this), this);
+		}
+
 		//Entityデータ確認、ロードできればBall配置
 		try {
 			final BufferedReader load = new BufferedReader(new FileReader("BlingBalls.dat"));
@@ -187,6 +201,12 @@ public class MainClass extends JavaPlugin implements Listener {
 	public void entityDamageByEntity(final EntityDamageByEntityEvent e) {
 		final Entity entity = e.getEntity();
 		if (entity instanceof Slime && this.balls.contains(entity)) {
+			if (e.getDamager() instanceof Snowball) {
+				final Slime slime = (Slime) entity;
+				slime.getWorld().playSound(slime.getLocation(), Sound.ENTITY_SMALL_SLIME_HURT, 1.0f, 1.0f);
+				slime.setNoDamageTicks(0);
+			}
+
 			if (e.getDamager() instanceof Player) {
 				Player p = (Player) e.getDamager();
 				if (p.getInventory().getItemInMainHand() != null) {

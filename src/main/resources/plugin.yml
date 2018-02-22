@@ -2,6 +2,7 @@ name: ${project.build.finalName}
 version: ${project.version}
 main: ${pluginMain}
 author: jack_basukeraihu
+softdepend: [CrackShot]
 commands:
   ball:
     description: Creates a ball.
